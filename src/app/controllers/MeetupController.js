@@ -1,6 +1,12 @@
 import * as Yup from 'yup';
 import { Op } from 'sequelize';
-import { isBefore, startOfDay, endOfDay, parseISO } from 'date-fns';
+import {
+    isBefore,
+    startOfDay,
+    endOfDay,
+    parseISO,
+    startOfHour,
+} from 'date-fns';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
 import File from '../models/File';
@@ -53,9 +59,9 @@ class MeetupController {
         }
 
         // Verifica se a data do meetup já passou
-        if (isBefore(parseISO(req.body.date_meetup), new Date())) {
+        /* if (isBefore(parseISO(req.body.date_meetup), new Date())) {
             return res.status(400).json({ error: 'Data do Meetup inválida' });
-        }
+        } */
 
         const user_id = req.userId;
 
