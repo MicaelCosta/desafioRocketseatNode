@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 import { isBefore, startOfDay, endOfDay, parseISO } from 'date-fns';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 class MeetupController {
     async index(req, res) {
@@ -19,7 +20,17 @@ class MeetupController {
 
         const meetups = await Meetup.findAll({
             where,
-            include: [User],
+            include: [
+                {
+                    model: File,
+                    as: 'file',
+                    attributes: ['id', 'path', 'url'],
+                },
+                {
+                    model: User,
+                    as: 'user',
+                },
+            ],
             limit: 10,
             offset: 10 * page - 10,
         });
@@ -30,10 +41,10 @@ class MeetupController {
     async store(req, res) {
         const schema = Yup.object().shape({
             title: Yup.string().required(),
-            file_id: Yup.number().required(),
             description: Yup.string().required(),
             location: Yup.string().required(),
             date_meetup: Yup.date().required(),
+            file_id: Yup.number().required(),
         });
 
         // Realiza a validação do schema
@@ -53,7 +64,20 @@ class MeetupController {
             user_id,
         });
 
-        return res.json(meetup);
+        const retornoMeetup = await Meetup.findOne({
+            where: {
+                id: meetup.id,
+            },
+            include: [
+                {
+                    model: File,
+                    as: 'file',
+                    attributes: ['id', 'path', 'url'],
+                },
+            ],
+        });
+
+        return res.json(retornoMeetup);
     }
 
     async update(req, res) {

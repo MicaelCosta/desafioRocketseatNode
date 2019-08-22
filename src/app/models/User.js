@@ -27,13 +27,13 @@ class User extends Model {
         return this;
     }
 
-    static associate(models) {
+    /* static associate(models) {
         // Um usuário pode organizar vários meetups
         this.hasMany(models.Meetup);
 
         // Um usuário pode se inscrever para vários meetups
         this.hasMany(models.Subscription);
-    }
+    } */
 
     checkPassword(password) {
         return bcrypt.compare(password, this.password_hash);
