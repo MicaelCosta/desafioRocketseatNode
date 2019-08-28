@@ -29,11 +29,11 @@ class Meetup extends Model {
         this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
         this.belongsTo(models.File, { foreignKey: 'file_id', as: 'file' });
 
-        /* // Um meetup pode estar associado a varias inscricoes
+        // Um meetup pode estar associado a varias inscricoes
         this.hasMany(models.Subscription, {
             foreignKey: 'meetup_id',
             as: 'subscription',
-        }); */
+        });
     }
 }
 

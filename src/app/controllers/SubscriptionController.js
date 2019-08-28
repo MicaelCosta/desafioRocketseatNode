@@ -1,7 +1,9 @@
 import { Op } from 'sequelize';
+import { startOfDay, endOfDay } from 'date-fns';
 import User from '../models/User';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
+import File from '../models/File';
 
 import SubscriptionMail from '../jobs/SubscriptionMail';
 import Queue from '../../lib/Queue';
@@ -15,15 +17,29 @@ class SubscriptionController {
             include: [
                 {
                     model: Meetup,
+                    as: 'meetup',
                     where: {
                         date_meetup: {
-                            [Op.gt]: new Date(),
+                            [Op.between]: [
+                                startOfDay(new Date()),
+                                endOfDay(new Date()),
+                            ],
                         },
                     },
                     required: true,
+                    include: [
+                        {
+                            model: User,
+                            as: 'user',
+                        },
+                        {
+                            model: File,
+                            as: 'file',
+                        },
+                    ],
+                    order: [[Meetup, 'date_meetup']],
                 },
             ],
-            order: [[Meetup, 'date_meetup']],
         });
 
         return res.json(subscriptions);
@@ -35,7 +51,7 @@ class SubscriptionController {
             include: [
                 {
                     model: User,
-                    as: 'organizer',
+                    as: 'user',
                     attributes: ['name', 'email'],
                 },
             ],
@@ -62,9 +78,10 @@ class SubscriptionController {
             include: [
                 {
                     model: Meetup,
+                    as: 'meetup',
                     required: true,
                     where: {
-                        date_meetup: meetup.date,
+                        date_meetup: meetup.date_meetup,
                     },
                 },
             ],
@@ -88,6 +105,18 @@ class SubscriptionController {
         });
 
         return res.json(subscription);
+    }
+
+    async delete(req, res) {
+        const subscription = await Subscription.findByPk(req.params.id);
+
+        if (!subscription) {
+            return res.status(400).json({ error: 'Incrição não encontrada' });
+        }
+
+        await subscription.destroy();
+
+        return res.json();
     }
 }
 

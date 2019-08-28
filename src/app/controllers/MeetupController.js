@@ -17,10 +17,10 @@ class MeetupController {
         const page = req.query.page || 1;
 
         if (req.query.date) {
-            const searchDate = parseISO(req.query.date);
+            const parsedDate = parseISO(req.query.date);
 
             where.date_meetup = {
-                [Op.between]: [startOfDay(searchDate), endOfDay(searchDate)],
+                [Op.between]: [startOfDay(parsedDate), endOfDay(parsedDate)],
             };
         }
 
