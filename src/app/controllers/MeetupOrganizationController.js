@@ -13,6 +13,7 @@ class MeetupOrganizationController {
                     attributes: ['id', 'path', 'url'],
                 },
             ],
+            order: ['date_meetup'],
         });
 
         return res.json(meetups);

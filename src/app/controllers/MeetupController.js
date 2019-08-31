@@ -58,16 +58,22 @@ class MeetupController {
             return res.status(400).json({ error: 'Validação falhou' });
         }
 
-        // Verifica se a data do meetup já passou
-        /* if (isBefore(parseISO(req.body.date_meetup), new Date())) {
-            return res.status(400).json({ error: 'Data do Meetup inválida' });
-        } */
+        const { title, description, location, date_meetup, file_id } = req.body;
 
-        const user_id = req.userId;
+        const hourStart = startOfHour(parseISO(date_meetup));
+
+        // Verifica se a data do meetup já passou
+        if (isBefore(hourStart, new Date())) {
+            return res.status(400).json({ error: 'Data do Meetup inválida' });
+        }
 
         const meetup = await Meetup.create({
-            ...req.body,
-            user_id,
+            title,
+            description,
+            location,
+            date_meetup: hourStart,
+            file_id,
+            user_id: req.userId,
         });
 
         const retornoMeetup = await Meetup.findOne({
@@ -101,6 +107,7 @@ class MeetupController {
         }
 
         const user_id = req.userId;
+        const { title, description, location, date_meetup, file_id } = req.body;
 
         const meetup = await Meetup.findByPk(req.params.id);
 
@@ -109,8 +116,10 @@ class MeetupController {
             return res.status(401).json({ error: 'Não autorizado' });
         }
 
+        const hourStart = startOfHour(parseISO(date_meetup));
+
         // Valida se a data já passou
-        if (isBefore(parseISO(req.body.date_meetup), new Date())) {
+        if (isBefore(hourStart, new Date())) {
             return res.status(400).json({ error: 'Data do Meetup inválida' });
         }
 
@@ -120,7 +129,14 @@ class MeetupController {
                 .json({ error: 'Não pode atualizar meetups passados.' });
         }
 
-        await meetup.update(req.body);
+        await meetup.update({
+            title,
+            description,
+            location,
+            date_meetup: hourStart,
+            file_id,
+            user_id: req.userId,
+        });
 
         return res.json(meetup);
     }
